@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">Skitmaker</string>
+    <string name="facebook_app_id">1367060880710978</string>
+    <string name="fb_login_protocol_scheme">fb1367060880710978</string>
+    <string name="facebook_client_token">a739e717d30ab7a2000e59805b8b1382</string>
+</resources>
