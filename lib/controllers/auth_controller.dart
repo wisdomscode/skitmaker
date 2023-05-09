@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:skitmaker/constants/colors.dart';
@@ -8,9 +7,9 @@ import 'package:skitmaker/constants/constance.dart';
 
 import 'package:skitmaker/models/user_model.dart' as user_model;
 import 'package:skitmaker/navigation_container.dart';
-import 'package:skitmaker/views/screens/auth/home_page.dart';
 import 'package:skitmaker/views/screens/auth/login_page.dart';
-import 'package:skitmaker/views/screens/profile/update_user_profile.dart';
+import 'package:skitmaker/views/screens/profile/profile_page.dart';
+import 'package:skitmaker/views/screens/profile/update_profile.dart';
 
 class AuthController extends GetxController {
   // to get the AuthController and return its instance
@@ -20,7 +19,8 @@ class AuthController extends GetxController {
   late Rx<User?> _user;
 
   User get user => _user.value!;
-  DateTime dob = DateTime.now();
+
+  DateTime date = DateTime.now();
 
   @override
   void onReady() {
@@ -72,28 +72,45 @@ class AuthController extends GetxController {
 
   // register the user
   void registerUser(
-    String username,
     String email,
     String password,
   ) async {
     try {
-      if (username.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+      if (email.isNotEmpty && password.isNotEmpty) {
         // save user to auth and firebase
         UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
 
+        // to get the last user id
+        int lastuserId = await firestore
+            .collection('users')
+            .orderBy("dateJoined", descending: true)
+            .limit(1)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          var data = querySnapshot.docs.first.data() as Map;
+
+          var userId = data['userId'];
+          return userId;
+        });
+
         user_model.User user = user_model.User(
-            uid: cred.user!.uid,
-            username: username,
-            email: email,
-            password: password,
-            fullName: '',
-            dob: dob,
-            phoneNumber: '',
-            gender: '',
-            profileImage: '');
+          uid: cred.user!.uid,
+          userId: lastuserId + 1,
+          userStatus: 'active',
+          dateJoined: Timestamp.fromDate(date),
+          username: '',
+          email: email,
+          password: password,
+          fullName: '',
+          dob: Timestamp.fromDate(date),
+          phoneNumber: '',
+          gender: '',
+          profileImage: '',
+          biography: '',
+        );
 
         await firestore
             .collection('users')
@@ -103,7 +120,7 @@ class AuthController extends GetxController {
         Get.to(() => const UpdateUserProfilePage(),
             arguments: [
               {'uid': cred.user!.uid},
-              {"username": username},
+              {"username": ''},
               {"email": email},
               {"fullName": ''},
               {"dob": ''},
@@ -115,22 +132,23 @@ class AuthController extends GetxController {
             duration: const Duration(seconds: 1));
       } else {
         Get.snackbar(
-          'Error Creating Account',
-          'Please enter all the mandatory fields',
+          'Error!',
+          'Please fillout all the fields',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
           colorText: mainWhite,
         );
+        Get.back();
       }
     } catch (e) {
       Get.snackbar(
         'Error Creating Account',
-        // e.toString(),
-        "Invalid username or password",
+        e.toString(),
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
         colorText: mainWhite,
       );
+      Get.back();
     }
   }
 
@@ -140,7 +158,7 @@ class AuthController extends GetxController {
       if (email.isNotEmpty && password.isNotEmpty) {
         await firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password);
-        print('User LOGGING IN Successfully!!!!');
+        // print('User LOGGING IN Successfully!!!!');
 
         Get.to(
           () => const NavigationContainer(),
@@ -155,6 +173,7 @@ class AuthController extends GetxController {
           duration: const Duration(seconds: 3),
           colorText: mainWhite,
         );
+        Get.back();
       }
     } catch (e) {
       Get.snackbar(
@@ -165,6 +184,7 @@ class AuthController extends GetxController {
         duration: const Duration(seconds: 3),
         colorText: mainWhite,
       );
+      Get.back();
     }
   }
 
@@ -173,61 +193,69 @@ class AuthController extends GetxController {
       String username,
       String email,
       String? fullName,
-      DateTime? dob,
+      DateTime dob,
       String? phoneNumber,
       String? gender,
       String? profileImageUrl) async {
     try {
       if (username.isNotEmpty && email.isNotEmpty) {
         String uid = firebaseAuth.currentUser!.uid; // get currentUser id
+
         DocumentSnapshot userDoc =
             await firestore.collection('users').doc(uid).get();
 
         user_model.User user = user_model.User(
-            uid: uid,
-            username: username,
-            email: (userDoc.data()! as Map<String, dynamic>)['email'],
-            password: (userDoc.data()! as Map<String, dynamic>)['password'],
-            fullName: fullName,
-            dob: dob,
-            gender: gender,
-            phoneNumber: phoneNumber,
-            profileImage: profileImageUrl);
+          uid: uid,
+          userId: (userDoc.data()! as Map<String, dynamic>)['userId'],
+          userStatus: (userDoc.data()! as Map<String, dynamic>)['userStatus'],
+          dateJoined: (userDoc.data()! as Map<String, dynamic>)['dateJoined'],
+          username: username,
+          email: (userDoc.data()! as Map<String, dynamic>)['email'],
+          password: (userDoc.data()! as Map<String, dynamic>)['password'],
+          fullName: fullName,
+          dob: Timestamp.fromDate(dob),
+          gender: gender,
+          phoneNumber: phoneNumber,
+          profileImage: profileImageUrl,
+          biography: (userDoc.data()! as Map<String, dynamic>)['biography'],
+        );
 
         await firestore.collection('users').doc(uid).set(user.toJson());
 
-        Get.snackbar(
-          'Success',
-          'Profile Updated Successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
-          colorText: mainWhite,
-        );
+        // Get.to(
+        //   () => const NavigationContainer(),
+        //   transition: Transition.leftToRightWithFade,
+        //   duration: const Duration(
+        //     seconds: 1,
+        //   ),
+        // );
 
         Get.to(
-          () => const NavigationContainer(),
-          transition: Transition.leftToRightWithFade,
+          () => ProfilePage(uid: authController.user.uid),
+          transition: Transition.rightToLeftWithFade,
           duration: const Duration(
             seconds: 1,
           ),
         );
       } else {
         Get.snackbar(
-          'Error Updating Profile1',
+          'Error Updating Profile',
           'Please check your fields',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
           colorText: mainWhite,
         );
+        Get.back();
       }
     } catch (e) {
       Get.snackbar(
-        'Error Updating Profile2',
+        'Error Something went wrong',
         e.toString(),
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
         colorText: mainWhite,
       );
+      Get.back();
     }
   }
 
@@ -242,5 +270,109 @@ class AuthController extends GetxController {
       transition: Transition.zoom,
       duration: const Duration(seconds: 3),
     );
+  }
+
+  updateBiography(String biography) async {
+    try {
+      if (biography.isNotEmpty) {
+        String uid = firebaseAuth.currentUser!.uid; // get currentUser id
+
+        DocumentSnapshot userDoc =
+            await firestore.collection('users').doc(uid).get();
+
+        user_model.User user = user_model.User(
+          uid: uid,
+          userId: (userDoc.data()! as Map<String, dynamic>)['userId'],
+          userStatus: (userDoc.data()! as Map<String, dynamic>)['userStatus'],
+          dateJoined: (userDoc.data()! as Map<String, dynamic>)['dateJoined'],
+          username: (userDoc.data()! as Map<String, dynamic>)['username'],
+          email: (userDoc.data()! as Map<String, dynamic>)['email'],
+          password: (userDoc.data()! as Map<String, dynamic>)['password'],
+          fullName: (userDoc.data()! as Map<String, dynamic>)['fullName'],
+          dob: (userDoc.data()! as Map<String, dynamic>)['dob'],
+          gender: (userDoc.data()! as Map<String, dynamic>)['gender'],
+          phoneNumber: (userDoc.data()! as Map<String, dynamic>)['phoneNumber'],
+          profileImage:
+              (userDoc.data()! as Map<String, dynamic>)['profileImage'],
+          biography: biography,
+        );
+
+        await firestore.collection('users').doc(uid).set(user.toJson());
+
+        Get.snackbar('Bio Updated Successfully',
+            'Your Personal Summary has beenn Updated Successfully',
+            snackPosition: SnackPosition.TOP,
+            duration: const Duration(seconds: 5),
+            colorText: mainWhite,
+            backgroundColor: mainBlack);
+
+        Get.to(
+          () => ProfilePage(uid: authController.user.uid),
+          transition: Transition.rightToLeftWithFade,
+          duration: const Duration(
+            seconds: 1,
+          ),
+        );
+      } else {
+        Get.snackbar('Error Updating Profile', 'Please check your fields',
+            snackPosition: SnackPosition.TOP,
+            duration: const Duration(seconds: 5),
+            colorText: mainWhite,
+            backgroundColor: mainBlack);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error Something went wrong',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        colorText: mainWhite,
+      );
+    }
+  }
+
+  // update profile image
+  updateProfileImage(String profileImage) async {
+    try {
+      if (profileImage.isNotEmpty) {
+        String uid = firebaseAuth.currentUser!.uid; // get currentUser id
+
+        DocumentSnapshot userDoc =
+            await firestore.collection('users').doc(uid).get();
+
+        user_model.User user = user_model.User(
+          uid: uid,
+          userId: (userDoc.data()! as Map<String, dynamic>)['userId'],
+          userStatus: (userDoc.data()! as Map<String, dynamic>)['userStatus'],
+          dateJoined: (userDoc.data()! as Map<String, dynamic>)['dateJoined'],
+          username: (userDoc.data()! as Map<String, dynamic>)['username'],
+          email: (userDoc.data()! as Map<String, dynamic>)['email'],
+          password: (userDoc.data()! as Map<String, dynamic>)['password'],
+          fullName: (userDoc.data()! as Map<String, dynamic>)['fullName'],
+          dob: (userDoc.data()! as Map<String, dynamic>)['dob'],
+          gender: (userDoc.data()! as Map<String, dynamic>)['gender'],
+          phoneNumber: (userDoc.data()! as Map<String, dynamic>)['phoneNumber'],
+          profileImage: profileImage,
+          biography: (userDoc.data()! as Map<String, dynamic>)['biography'],
+        );
+
+        await firestore.collection('users').doc(uid).set(user.toJson());
+
+        Get.snackbar('Bio Updated Successfully',
+            'Your Personal Summary has beenn Updated Successfully',
+            snackPosition: SnackPosition.TOP,
+            duration: const Duration(seconds: 5),
+            colorText: mainWhite,
+            backgroundColor: mainBlack);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error Something went wrong',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        colorText: mainWhite,
+      );
+    }
   }
 }

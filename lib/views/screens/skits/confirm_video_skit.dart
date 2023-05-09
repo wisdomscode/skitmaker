@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:skitmaker/constants/colors.dart';
-import 'package:skitmaker/controllers/upload_video_controller.dart';
+import 'package:skitmaker/controllers/upload_skit_controller.dart';
 import 'package:skitmaker/navigation_container.dart';
 import 'package:skitmaker/views/screens/skits/components/category_select.dart';
 import 'package:skitmaker/views/screens/skits/skit_home_page.dart';

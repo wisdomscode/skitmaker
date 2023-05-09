@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:skitmaker/constants/colors.dart';
 import 'package:skitmaker/models/skit_model.dart';
-import 'package:skitmaker/views/widgets/bottom_modal_item.dart';
 import 'package:skitmaker/views/widgets/normal_text.dart';
 
 class SkitDownLoadItem extends StatefulWidget {

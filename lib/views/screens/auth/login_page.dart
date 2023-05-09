@@ -186,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                       isChecked: false,
                       selectedColor: mainRed,
                       selectedCheckColor: mainWhite,
-                      textLabel: "Rembemer Me ",
+                      textLabel: "Remember Me",
                       textColor: mainWhite,
                       textSize: 14,
                     ),
@@ -216,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   },
                   child: const Text(
-                    "Forget your Password?",
+                    "Forgot your Password?",
                     style: TextStyle(
                       color: mainRed,
                       fontSize: 16,

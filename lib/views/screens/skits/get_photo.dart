@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:skitmaker/constants/colors.dart';
+import 'package:skitmaker/views/screens/skits/components/checkboxList.dart';
 import 'package:skitmaker/views/screens/skits/confirm_photo_skit.dart';
-import 'package:skitmaker/views/screens/skits/confirm_video_skit.dart';
 import 'package:skitmaker/views/widgets/circular_gradient_icon_widget.dart';
 import 'package:skitmaker/views/widgets/large_text.dart';
 import 'package:skitmaker/views/widgets/normal_text.dart';
@@ -33,7 +33,7 @@ Future showImageOptionsDialog(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           LargeTextWidget(
-              text: 'Get Video Skit', textSize: 18, textColor: mainWhite),
+              text: 'Get Photo Skit', textSize: 18, textColor: mainWhite),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
@@ -43,6 +43,7 @@ Future showImageOptionsDialog(BuildContext context) {
         ],
       ),
       children: [
+        const PhotoSkit(),
         SimpleDialogOption(
           onPressed: () {
             pickImage(ImageSource.gallery, context);

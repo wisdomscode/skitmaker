@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:skitmaker/constants/colors.dart';
-import 'package:skitmaker/models/skit_model.dart';
-import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerItem extends StatefulWidget {
@@ -26,10 +22,11 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     _videoController = VideoPlayerController.network(widget.skitUrl);
-    _initializeVideoPlayer = _videoController.initialize();
-    _videoController.play();
-    // _videoController.setLooping(true);
-    _videoController.setVolume(1);
+    _initializeVideoPlayer = _videoController.initialize().then((value) {
+      _videoController.play();
+      _videoController.setVolume(1);
+      _videoController.setLooping(true);
+    });
     super.initState();
   }
 

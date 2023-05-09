@@ -9,17 +9,18 @@ import 'package:marquee/marquee.dart';
 import 'package:share/share.dart';
 import 'package:skitmaker/constants/colors.dart';
 import 'package:skitmaker/constants/constance.dart';
-import 'package:skitmaker/controllers/skit_controller.dart';
+import 'package:skitmaker/controllers/comment_controller.dart';
+import 'package:skitmaker/controllers/videoskit_controller.dart';
 import 'package:skitmaker/views/screens/profile/profile_page.dart';
 import 'package:skitmaker/views/screens/skits/components/comment_screen.dart';
-import 'package:skitmaker/views/screens/skits/components/widgets/video_player_item.dart';
+import 'package:skitmaker/views/screens/skits/components/video_player_item.dart';
+import 'package:skitmaker/views/widgets/large_text.dart';
+import 'package:skitmaker/views/widgets/normal_text.dart';
 
 import 'package:timeago/timeago.dart' as tago;
 
 class QuickyPage extends StatefulWidget {
-  QuickyPage({super.key});
-
-  final SkitController skitController = Get.put(SkitController());
+  const QuickyPage({super.key});
 
   @override
   State<QuickyPage> createState() => _QuickyPageState();
@@ -33,6 +34,14 @@ class _QuickyPageState extends State<QuickyPage>
       DeviceOrientation.portraitDown,
     ]);
   }
+  final VideoSkitController skitController = Get.put(VideoSkitController());
+  final TextEditingController _commentController = TextEditingController();
+  CommentController commentController = Get.put(CommentController());
+
+  void clearText() {
+    _commentController.clear();
+  }
+
   bool _isFollowingSelected = true;
 
   late AnimationController _animationController;
@@ -115,14 +124,11 @@ class _QuickyPageState extends State<QuickyPage>
       ),
       body: Obx(() {
         return PageView.builder(
-          itemCount: widget.skitController.shortSkitList.length,
+          itemCount: skitController.shortSkitList.length,
           controller: PageController(initialPage: 0, viewportFraction: 1),
-          onPageChanged: (int page) => {
-            setState(() {}),
-          },
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index) {
-            final data = widget.skitController.shortSkitList[index];
+            final data = skitController.shortSkitList[index];
             return Center(
               child: Stack(
                 alignment: Alignment.bottomCenter,
@@ -194,7 +200,7 @@ class _QuickyPageState extends State<QuickyPage>
                       ),
                       Expanded(
                         child: SizedBox(
-                            height: MediaQuery.of(context).size.height / 1.7,
+                            height: MediaQuery.of(context).size.height / 1.8,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -212,64 +218,60 @@ class _QuickyPageState extends State<QuickyPage>
                                     );
                                   },
                                   () {
-                                    Get.to(
-                                      () => CommentScreen(id: data.id),
-                                      transition: Transition.downToUp,
-                                      duration: const Duration(
-                                        seconds: 2,
-                                      ),
-                                    );
+                                    print('Follow');
                                   },
                                 ),
-                                const SizedBox(height: 5),
                                 _sideBarItem(
-                                  Icons.thumb_up,
+                                  Icons.favorite,
                                   data.likes.contains(authController.user.uid)
                                       ? mainRed
                                       : Colors.white,
-                                  () {
-                                    widget.skitController.likeSkit(data.id);
-                                  },
+                                  () => skitController.likeSkit(data.id),
                                   data.likes.length.toString(),
                                   const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18,
+                                    fontSize: 14,
                                   ),
                                 ),
                                 _sideBarItem(
                                   Icons.chat_rounded,
                                   Colors.white,
                                   () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => CommentScreen(
+                                    showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      barrierColor: Colors.black54,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CommentScreen(
                                           id: data.id,
-                                        ),
-                                      ),
+                                          data: data,
+                                        );
+                                      },
                                     );
                                   },
                                   data.commentCount.toString(),
                                   const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18),
+                                      fontSize: 14),
+                                ),
+                                _sideBarItem(
+                                  Icons.share,
+                                  Colors.white,
+                                  () {
+                                    Share.share(data.skitUrl!);
+                                    skitController.updateShareCount(data.id);
+                                  },
+                                  data.shareCount.toString(),
+                                  const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(right: 15.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      Share.share(data.skitUrl!);
-                                    },
-                                    child: const Icon(
-                                      Icons.share,
-                                      size: 40,
-                                      color: mainWhite,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 15.0),
+                                  padding: const EdgeInsets.only(right: 20.0),
                                   child: InkWell(
                                     onTap: () {
                                       FileDownloader.downloadFile(
@@ -280,7 +282,9 @@ class _QuickyPageState extends State<QuickyPage>
                                           });
                                         },
                                         onDownloadCompleted: (path) {
-                                          print('PATH: $path');
+                                          // print('PATH: $path');
+                                          skitController
+                                              .updateDownloadCount(data.id);
                                           setState(() {
                                             _progress = null;
                                             Get.snackbar('Download Complete',
@@ -297,15 +301,26 @@ class _QuickyPageState extends State<QuickyPage>
                                     },
                                     child: _progress != null
                                         ? const CircularProgressIndicator()
-                                        : const Icon(
-                                            Icons.download,
-                                            size: 40,
-                                            color: mainWhite,
+                                        : Column(
+                                            children: [
+                                              const Icon(
+                                                Icons.download,
+                                                size: 30,
+                                                color: mainWhite,
+                                              ),
+                                              Text(
+                                                data.downloadCount.toString(),
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14),
+                                              ),
+                                            ],
                                           ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(right: 15.0),
+                                  padding: const EdgeInsets.only(right: 10.0),
                                   child: AnimatedBuilder(
                                     animation: _animationController,
                                     child: Stack(
@@ -346,19 +361,19 @@ class _QuickyPageState extends State<QuickyPage>
     );
   }
 
-  _sideBarItem(IconData iconName, Color iconColor, press(), String label,
+  _sideBarItem(IconData iconName, Color iconColor, press, String label,
       TextStyle style) {
     return InkWell(
       onTap: () {
         press();
       },
       child: Padding(
-        padding: const EdgeInsets.only(right: 15.0),
+        padding: const EdgeInsets.only(right: 20.0),
         child: Column(
           children: [
             Icon(
               iconName,
-              size: 40,
+              size: 30,
               color: iconColor,
             ),
             Text(label, style: style),
@@ -368,37 +383,39 @@ class _QuickyPageState extends State<QuickyPage>
     );
   }
 
-  _profileImageButton(String profileImage, profile(), follow()) {
+  _profileImageButton(String profileImage, profile, follow) {
     return Padding(
-      padding: const EdgeInsets.only(right: 15.0),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.bottomCenter,
-        children: [
-          InkWell(
-            onTap: () {
-              profile();
-            },
-            child: Container(
-              height: 50,
-              width: 50,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 3),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Image(
-                  image: NetworkImage(profileImage),
-                  fit: BoxFit.cover,
+      padding: const EdgeInsets.only(right: 10.0),
+      child: SizedBox(
+        height: 70,
+        width: 50,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Align(
+              child: GestureDetector(
+                onTap: () {
+                  profile();
+                },
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 3),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: Image(
+                      image: NetworkImage(profileImage),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -15,
-            child: GestureDetector(
+            GestureDetector(
               onTap: () {
                 follow();
               },
@@ -413,9 +430,9 @@ class _QuickyPageState extends State<QuickyPage>
                   color: Colors.white,
                 ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

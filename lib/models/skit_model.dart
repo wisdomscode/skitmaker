@@ -6,9 +6,10 @@ class Skit {
   String username;
   String id;
   List likes;
-  int views;
+  List views;
   int commentCount;
   int shareCount;
+  int downloadCount;
   String? category;
   String? skitTitle;
   String? description;
@@ -27,6 +28,7 @@ class Skit {
     required this.views,
     required this.commentCount,
     required this.shareCount,
+    required this.downloadCount,
     this.category,
     this.skitTitle,
     this.description,
@@ -46,6 +48,7 @@ class Skit {
         "views": views,
         "commentCount": commentCount,
         "shareCount": shareCount,
+        "downloadCount": downloadCount,
         "category": category,
         "skitTitle": skitTitle,
         "description": description,
@@ -68,6 +71,7 @@ class Skit {
       views: snapshot['views'],
       commentCount: snapshot['commentCount'],
       shareCount: snapshot['shareCount'],
+      downloadCount: snapshot['downloadCount'],
       category: snapshot['category'],
       skitTitle: snapshot['skitTitle'],
       description: snapshot['description'],

@@ -9,6 +9,8 @@ class SearchController extends GetxController {
   List<User> get seachedUsers => _searchedUsers.value;
 
   searchUser(String typedUser) async {
+    print('#####################################');
+    print(typedUser);
     _searchedUsers.bindStream(
       firestore
           .collection('users')
@@ -27,3 +29,4 @@ class SearchController extends GetxController {
     );
   }
 }
+// https://www.youtube.com/watch?v=WbXTl9tiziI

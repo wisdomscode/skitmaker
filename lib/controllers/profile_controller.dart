@@ -15,12 +15,18 @@ class ProfileController extends GetxController {
 
   getUserData() async {
     List<String> thumbnails = [];
+    List<String> skitIds = [];
+    List<String> skitTypes = [];
     var mySkits = await firestore
         .collection('skits')
         .where('uid', isEqualTo: _uid.value)
         .get();
+
+    // all user skit thumbnails and skitIds
     for (int i = 0; i < mySkits.docs.length; i++) {
       thumbnails.add((mySkits.docs[i].data() as dynamic)['thumbnail']);
+      skitIds.add((mySkits.docs[i].data() as dynamic)['id']);
+      skitTypes.add((mySkits.docs[i].data() as dynamic)['skitType']);
     }
 
     DocumentSnapshot userDoc =
@@ -35,6 +41,7 @@ class ProfileController extends GetxController {
     String phoneNumber = userData['phoneNumber'];
     String gender = userData['gender'];
     Timestamp dob = userData['dob'];
+    String biography = userData['biography'];
     int likes = 0;
     int followers = 0;
     int following = 0;
@@ -103,7 +110,10 @@ class ProfileController extends GetxController {
       'phoneNumber': phoneNumber,
       'gender': gender,
       'dob': dob,
+      'biography': biography,
       'thumbnails': thumbnails,
+      'skitIds': skitIds,
+      'skitTypes': skitTypes,
     };
 
     update();

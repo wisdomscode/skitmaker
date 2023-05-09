@@ -27,24 +27,28 @@ class _CustomPopupMenuButtonState extends State<CustomPopupMenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    dynamic prof_image;
     return GetBuilder<ProfileController>(
         init: ProfileController(),
         builder: (controller) {
           return Column(
             children: [
               PopupMenuButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
                 itemBuilder: (context) {
                   return [
                     PopupMenuItem<int>(
                       value: -1,
+                      height: 16,
+                      padding:
+                          const EdgeInsets.only(top: 10, left: 15, bottom: 3),
                       child: Row(
                         children: [
                           Text(
                             "Hi, ${controller.user['username']} ",
                             style: const TextStyle(
                                 color: lightBlack,
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -52,72 +56,84 @@ class _CustomPopupMenuButtonState extends State<CustomPopupMenuButton> {
                     ),
                     PopupMenuItem<int>(
                       value: 0,
+                      height: 16,
+                      padding: const EdgeInsets.only(
+                          top: 10, left: 15, bottom: 10, right: 10),
                       child: Row(
                         children: const [
-                          Icon(Icons.person, color: lightBlack),
+                          Icon(Icons.person, color: mainRed, size: 18),
                           SizedBox(width: 5),
                           Text(
                             "My Profile ",
-                            style: const TextStyle(
-                                color: lightBlack,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: lightBlack,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     PopupMenuItem<int>(
                       value: 1,
+                      height: 16,
+                      padding: const EdgeInsets.only(
+                          top: 10, left: 15, bottom: 10, right: 10),
                       child: Row(
                         children: const [
-                          Icon(Icons.settings, color: lightBlack),
+                          Icon(Icons.settings, color: mainRed, size: 18),
                           SizedBox(width: 5),
                           Text(
                             'Interests',
                             style: TextStyle(
-                                color: lightBlack,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                              color: lightBlack,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     PopupMenuItem<int>(
                       value: 2,
+                      height: 16,
+                      padding: const EdgeInsets.only(
+                          top: 10, left: 15, bottom: 10, right: 10),
                       child: Row(
                         children: const [
-                          Icon(Icons.people, color: lightBlack),
+                          Icon(Icons.people, color: mainRed, size: 18),
                           SizedBox(width: 5),
                           Text(
                             'All Users',
                             style: TextStyle(
-                                color: lightBlack,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                              color: lightBlack,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     PopupMenuItem<int>(
                       value: 3,
+                      height: 16,
+                      padding: const EdgeInsets.only(
+                          top: 10, left: 15, bottom: 10, right: 10),
                       child: Row(
                         children: const [
-                          Icon(Icons.logout, color: lightBlack),
+                          Icon(Icons.logout, color: mainRed, size: 18),
                           SizedBox(width: 5),
                           Text(
                             'Logout',
                             style: TextStyle(
-                                color: lightBlack,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                              color: lightBlack,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ];
                 },
-                offset: const Offset(0, 100),
-                color: Colors.grey,
+                offset: const Offset(0, 50),
+                color: Colors.grey[200],
                 elevation: 2,
                 onSelected: (value) {
                   if (value == 0) {

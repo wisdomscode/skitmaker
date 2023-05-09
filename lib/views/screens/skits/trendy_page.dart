@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:skitmaker/constants/colors.dart';
-import 'package:skitmaker/controllers/skit_controller.dart';
+import 'package:skitmaker/controllers/videoskit_controller.dart';
 import 'package:skitmaker/views/screens/skits/components/skit_category_item.dart';
 import 'package:skitmaker/views/screens/skits/single_movie_skit.dart';
 import 'package:skitmaker/views/widgets/bottom_modal_item.dart';
@@ -10,15 +11,10 @@ import 'package:get/get.dart';
 import 'package:skitmaker/views/widgets/normal_text.dart';
 import 'package:timeago/timeago.dart' as tago;
 
-class TrendyPage extends StatefulWidget {
+class TrendyPage extends StatelessWidget {
   TrendyPage({super.key});
-  final SkitController skitController = Get.put(SkitController());
+  final VideoSkitController skitController = Get.put(VideoSkitController());
 
-  @override
-  State<TrendyPage> createState() => _TrendyPageState();
-}
-
-class _TrendyPageState extends State<TrendyPage> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -61,9 +57,10 @@ class _TrendyPageState extends State<TrendyPage> {
                 height: size.height * 0.74,
                 child: Obx(() {
                   return ListView.builder(
-                    itemCount: widget.skitController.trendySkitList.length,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: skitController.trendySkitList.length,
                     itemBuilder: (context, index) {
-                      final data = widget.skitController.trendySkitList[index];
+                      final data = skitController.trendySkitList[index];
                       return GestureDetector(
                         onTap: () {
                           Get.to(
@@ -75,11 +72,28 @@ class _TrendyPageState extends State<TrendyPage> {
                           width: double.infinity,
                           child: Column(
                             children: [
-                              Image.network(
-                                data.thumbnail!,
+                              Container(
                                 height: 190,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                                decoration:
+                                    const BoxDecoration(color: lightBlack),
+                                child: CachedNetworkImage(
+                                  imageUrl: data.thumbnail ??
+                                      'images/background.jpeg',
+                                  fit: BoxFit.cover,
+                                  height: 190,
+                                  width: double.infinity,
+                                  placeholder: (context, url) => Center(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: const CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset(
+                                    'images/background.jpeg',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                               Padding(
                                 padding:
@@ -100,10 +114,7 @@ class _TrendyPageState extends State<TrendyPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.66,
+                                          width: size.width * 0.67,
                                           child: Text(
                                             data.skitTitle!,
                                             overflow: TextOverflow.ellipsis,
@@ -113,13 +124,17 @@ class _TrendyPageState extends State<TrendyPage> {
                                             ),
                                           ),
                                         ),
+                                        const SizedBox(height: 5),
                                         NormalTextWidget(
-                                            text: data.category!,
-                                            textColor: Colors.grey.shade500),
+                                          text: "@${data.username}",
+                                          textColor: Colors.white,
+                                        ),
+                                        const SizedBox(height: 5),
                                         Row(
                                           children: [
                                             NormalTextWidget(
-                                              text: "@${data.username}",
+                                              text:
+                                                  "${data.views.length.toString()} views",
                                               textColor: Colors.grey.shade500,
                                             ),
                                             const SizedBox(width: 15),
@@ -133,7 +148,8 @@ class _TrendyPageState extends State<TrendyPage> {
                                               text: tago.format(
                                                   data.dateCreated.toDate()),
                                               textColor: Colors.grey.shade500,
-                                            ), // check date
+                                            )
+                                            // check date
                                           ],
                                         ),
                                       ],
@@ -149,7 +165,6 @@ class _TrendyPageState extends State<TrendyPage> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return Container(
-                                              // height: 600,
                                               decoration: BoxDecoration(
                                                   color: Colors.black
                                                       .withOpacity(0.8),

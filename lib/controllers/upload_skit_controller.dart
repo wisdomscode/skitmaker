@@ -71,9 +71,10 @@ class UploadVideoController extends GetxController {
         username: (userDoc.data()! as Map<String, dynamic>)['username'],
         id: "Skit $len",
         likes: [],
-        views: 0,
+        views: [],
         commentCount: 0,
         shareCount: 0,
+        downloadCount: 0,
         category: category,
         skitTitle: skitTitle,
         description: description,
@@ -85,7 +86,6 @@ class UploadVideoController extends GetxController {
       );
 
       await firestore.collection('skits').doc('Skit $len').set(skit.toJson());
-      const CircularProgressIndicator();
       Get.to(() => const NavigationContainer());
     } catch (e) {
       Get.snackbar('Error Uploading Skit', e.toString());

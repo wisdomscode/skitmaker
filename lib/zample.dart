@@ -1067,13 +1067,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
 
-                        const Expanded(
-                          child: TabBarView(children: [
-                            FirstTab(),
-                            SecondTab(),
-                            ThirdTab(),
-                          ]),
-                        ),
+                        // const Expanded(
+                        //   child: TabBarView(children: [
+                        //     FirstTab(),
+                        //     SecondTab(),
+                        //     ThirdTab(),
+                        //   ]),
+                        // ),
                       ],
                     );
             } else {

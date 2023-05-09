@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:skitmaker/views/screens/profile/update_user_profile.dart';
+import 'package:skitmaker/views/screens/profile/update_profile.dart';
 import 'package:skitmaker/views/screens/profile/interests_listview_widget.dart';
 import 'package:skitmaker/views/widgets/go_back_button.dart';
 import 'package:skitmaker/views/widgets/large_text.dart';

@@ -129,11 +129,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
                           onTap: () {
                             Navigator.pop(context);
                             showVideoOptionsDialog(context);
-                            // Get.to(
-                            //   () => AddSkitPage(),
-                            //   transition: Transition.downToUp,
-                            //   duration: Duration(milliseconds: 300),
-                            // );
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),

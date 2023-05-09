@@ -25,9 +25,6 @@ class SignInProvider extends ChangeNotifier {
   String? _errorCode;
   String? get errorCode => _errorCode;
 
-  String? _provider;
-  String? get provider => _provider;
-
   String? _uid;
   String? get uid => _uid;
 
@@ -36,6 +33,9 @@ class SignInProvider extends ChangeNotifier {
 
   String? _email;
   String? get email => _email;
+
+  String? _password;
+  String? get password => _password;
 
   String? _profileImage;
   String? get profileImage => _profileImage;
@@ -51,6 +51,20 @@ class SignInProvider extends ChangeNotifier {
 
   String? _phoneNumber;
   String? get phoneNumber => _phoneNumber;
+
+  String? _biography;
+  String? get biography => _biography;
+
+  int? _userId;
+  int? get userId => _userId;
+
+  String? _userStatus;
+  String? get userStatus => _userStatus;
+
+  Timestamp? _dateJoined;
+  Timestamp? get dateJoined => _dateJoined;
+
+  DateTime date = DateTime.now();
 
   // final now = DateTime.now();
   // final today = DateTime(now.year, now.month, now.day);
@@ -82,16 +96,33 @@ class SignInProvider extends ChangeNotifier {
         String? usernameFromEmail =
             userDetails.email?.substring(0, userDetails.email?.indexOf("@"));
 
+        // to get the last user id
+        int lastuserId = await firestore
+            .collection('users')
+            .orderBy("dateJoined", descending: true)
+            .limit(1)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          var data = querySnapshot.docs.first.data() as Map;
+
+          var userId = data['userId'];
+          return userId;
+        });
+
         // save user details
         _uid = userDetails.uid;
         _fullName = userDetails.displayName;
         _email = userDetails.email;
         _profileImage = userDetails.photoURL;
-        _provider = "GOOGLE";
+        _password = '';
         _phoneNumber = '';
         _gender = '';
         _username = usernameFromEmail;
         _dob = defaultDate;
+        _userId = lastuserId + 1;
+        _userStatus = 'active';
+        _dateJoined = Timestamp.fromDate(date);
+        _biography = '';
 
         _isSignedIn = true;
 
@@ -144,7 +175,6 @@ class SignInProvider extends ChangeNotifier {
       _fullName = snapshot["fullName"];
       _email = snapshot["email"];
       _profileImage = snapshot["profileImage"];
-      _provider = snapshot["provider"];
       _phoneNumber = snapshot["phoneNumber"];
       _gender = snapshot["gender"];
       _dob = snapshot["dob"];
@@ -161,7 +191,6 @@ class SignInProvider extends ChangeNotifier {
       "fullName": _fullName,
       "email": _email,
       "profileImage": _profileImage,
-      "provider": _provider,
       "phoneNumber": _phoneNumber,
       "gender": _gender,
       "dob": _dob,

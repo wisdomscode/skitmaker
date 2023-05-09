@@ -1,0 +1,20 @@
+Please brief description of the app.
+It is a social app for making skits, more like a combination of Youtub and Tiktok.
+1. Registered user can view skits, create both video skit and short skit
+2. can Follow and be Followed
+3. can like and unlike a skit
+4. can share skits (video and short)
+5  can download skit (video and short)
+6. can comment on skits
+7. view all users profile
+8. update your profile (still working on this)
+and some other feactures and some still to come
+
+todo in skitmaker app
+1. update profile
+2. change password
+3. update category
+4. search 
+5. check create short skit
+6. add skip button to onboarding screen
+7. rework the onboarding screens (change images)

@@ -32,14 +32,14 @@ class MainButtomWidget extends StatelessWidget {
         ),
       ),
       child: TextButton(
-        onPressed: (){
+        onPressed: () {
           active ? {press()} : null;
         },
         child: Text(
           btnText,
           style: TextStyle(
             color: active ? mainWhite : Colors.grey.shade700,
-            fontSize: textSize ?? 20,
+            fontSize: textSize ?? 16,
             fontWeight: FontWeight.bold,
           ),
         ),

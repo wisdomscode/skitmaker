@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skitmaker/constants/colors.dart';
-import 'package:skitmaker/navigation_container.dart';
-import 'package:skitmaker/views/screens/skits/components/skit-downlaoded_items_list.dart';
-import 'package:skitmaker/views/screens/skits/skit_home_page.dart';
-import 'package:skitmaker/views/widgets/go_back_button.dart';
 import 'package:skitmaker/views/widgets/large_text.dart';
-import 'package:skitmaker/views/widgets/navigation_icon_button.dart';
-import 'package:get/get.dart';
 
 class DownloadPage extends StatelessWidget {
   const DownloadPage({super.key});
@@ -30,7 +24,12 @@ class DownloadPage extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: double.infinity,
-              child: SkitDownlaodedItemList(),
+              child: ListView.builder(
+                itemCount: 1,
+                itemBuilder: (context, index) {
+                  return Container();
+                },
+              ),
             ),
           ),
         ],

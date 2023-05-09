@@ -1,81 +1,146 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:skitmaker/constants/colors.dart';
-import 'package:skitmaker/controllers/search_controller.dart';
-import 'package:skitmaker/models/user_model.dart';
+import 'package:skitmaker/constants/constance.dart';
 import 'package:skitmaker/views/screens/profile/profile_page.dart';
-import 'package:skitmaker/views/widgets/custom_appbar_widget.dart';
-import 'package:skitmaker/views/widgets/large_text.dart';
+import 'package:skitmaker/views/widgets/go_back_button.dart';
 
-class SearchUserScreen extends StatelessWidget {
-  SearchUserScreen({super.key});
-
-  final SearchController searchController = Get.put(SearchController());
+class SearchUserScreen extends StatefulWidget {
+  const SearchUserScreen({super.key});
 
   @override
+  State<SearchUserScreen> createState() => _SearchUserScreenState();
+}
+
+class _SearchUserScreenState extends State<SearchUserScreen> {
+  String name = '';
+  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Obx(() {
-      return Scaffold(
+    return Scaffold(
+      backgroundColor: lightBlack,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: mainBlack,
-        appBar: CustomAppBarWidget(),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 15.0),
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  filled: false,
-                  hintText: 'Search',
-                  hintStyle: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-                style: const TextStyle(color: mainWhite),
-                onFieldSubmitted: (value) => searchController.searchUser(value),
-              ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: GoBackButtonWidget(),
+          )
+        ],
+        title: TextFormField(
+          style: const TextStyle(color: mainWhite),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.search, color: mainWhite),
+            hintText: 'Search...',
+            hintStyle: TextStyle(
+              fontSize: 16,
+              color: Colors.white,
             ),
-            Expanded(
-              child: searchController.seachedUsers.isEmpty
-                  ? Center(
-                      child: LargeTextWidget(
-                        text: 'Search for users!',
-                        textColor: mainWhite,
-                        textSize: 25,
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: searchController.seachedUsers.length,
-                      itemBuilder: (context, index) {
-                        User user = searchController.seachedUsers[index];
-                        return InkWell(
-                          onTap: () {
-                            Get.to(
-                                () => ProfilePage(
-                                      uid: user.uid,
-                                    ),
-                                transition: Transition.leftToRightWithFade,
-                                duration: const Duration(seconds: 1));
-                          },
-                          child: ListTile(
+          ),
+          onChanged: (value) {
+            setState(() {
+              name = value;
+            });
+          },
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection('users').snapshots(),
+        builder: (context, snapshots) {
+          // var item = snapshots.data;
+          // if (item != null) {
+          return (snapshots.connectionState == ConnectionState.waiting)
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  itemCount: snapshots.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var user = snapshots.data!.docs[index].data()
+                        as Map<String, dynamic>;
+
+                    if (name.isEmpty) {
+                      return InkWell(
+                        onTap: () {
+                          Get.to(
+                              () => ProfilePage(
+                                    uid: user['uid'],
+                                  ),
+                              transition: Transition.leftToRightWithFade,
+                              duration: const Duration(seconds: 1));
+                        },
+                        child: ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: NetworkImage(user.profileImage!),
+                              backgroundImage:
+                                  NetworkImage(user['profileImage']),
                               backgroundColor: mainBlack,
                             ),
                             title: Text(
-                              user.username,
-                              style: const TextStyle(color: mainWhite),
+                              user['username'],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: mainWhite,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      );
-    });
+                            subtitle: Text(
+                              user['email'],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: mainWhite, fontSize: 13),
+                            )),
+                      );
+                    }
+
+                    if (user['username']
+                            .toString()
+                            .startsWith(name.toLowerCase()) ||
+                        user['username']
+                            .toString()
+                            .startsWith(name.toUpperCase())) {
+                      return InkWell(
+                        onTap: () {
+                          Get.to(
+                              () => ProfilePage(
+                                    uid: user['uid'],
+                                  ),
+                              transition: Transition.leftToRightWithFade,
+                              duration: const Duration(seconds: 1));
+                        },
+                        child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(user['profileImage']),
+                              backgroundColor: mainBlack,
+                            ),
+                            title: Text(
+                              user['username'],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: mainWhite,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              user['email'],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: mainWhite, fontSize: 13),
+                            )),
+                      );
+                    }
+
+                    return Container();
+                  },
+                );
+          // }
+          // return Container();
+        },
+      ),
+    );
   }
 }
